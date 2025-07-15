@@ -1,12 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import CreateTaskDto from './dto/create-task.dto';
-
-type Task = {
-  id: number;
-  title: string;
-  description: string;
-  isComplied: boolean;
-};
+import { CreateTaskDto, UpdateTaskDto } from './dto';
+import { Task } from './types';
 
 const tasks: Task[] = [
   {
@@ -14,24 +8,32 @@ const tasks: Task[] = [
     title: 'Test',
     description: 'Testing Nest',
     isComplied: true,
+    tags: ['pending'],
+    priority: 10,
   },
   {
     id: 1,
     title: 'Learn Nest',
     description: 'Learn Nest',
     isComplied: false,
+    tags: ['completed', 'dev', 'hot'],
+    priority: 4,
   },
   {
     id: 2,
     title: 'Build Nest',
     description: 'Learn Nest',
     isComplied: true,
+    tags: ['high', 'hot'],
+    priority: 10,
   },
   {
     id: 3,
     title: 'REST',
     description: 'Learn REST API',
     isComplied: true,
+    tags: ['dev', 'low'],
+    priority: 0,
   },
 ];
 
@@ -50,14 +52,37 @@ export class TaskService {
   }
 
   create(dto: CreateTaskDto) {
-    const { title } = dto;
-    const task = {
+    const task: Task = {
       id: this.tasks.length + 1,
-      title,
       description: 'description',
       isComplied: false,
+      tags: ['pending'],
+      priority: 1,
+      ...dto,
     };
     this.tasks.push(task);
-    return this.tasks;
+    return true;
+  }
+
+  update(id: number, dto: UpdateTaskDto) {
+    const task = this.findById(id);
+
+    Object.assign(task, dto);
+
+    return task;
+  }
+
+  patchUpdate(id: number, dto: Partial<UpdateTaskDto>) {
+    const task = this.findById(id);
+
+    Object.assign(task, dto);
+
+    return task;
+  }
+
+  deleteById(id: number) {
+    const task = this.findById(id);
+    this.tasks = this.tasks.filter((t) => t.id !== task.id);
+    return true;
   }
 }

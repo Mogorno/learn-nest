@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URI")
+}
+
+enum AnimeStatus {
+  ONGOING
+  COMPLETED
+  ANNOUNCED
+
+  @@map("anime_status")
+}
+
+model Anime {
+  id String @id @default(uuid())
+
+  title       String
+  description String?
+
+  status      AnimeStatus @default(ONGOING)
+  rating      Float       @default(0)
+  isAvailable Boolean     @default(false) @map("is_available")
+
+  poster     Poster?       @relation("anime_posters")
+  genres     Genre[]       @relation("anime_genres")
+  seasons    Season[]      @relation("anime_seasons")
+  reviews    AnimeReview[] @relation("anime_reviews")
+  characters Character[]   @relation("anime_characters")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("anime")
+}
+
+model Character {
+  id String @id @default(uuid())
+
+  name        String
+  age         Int
+  description String?
+
+  animeId String @map("anime_id")
+  anime   Anime  @relation("anime_characters", fields: [animeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("characters")
+}
+
+model AnimeReview {
+  id String @id @default(uuid())
+
+  content String
+  rating  Float
+  author  String
+
+  animeId String @map("anime_id")
+  anime   Anime  @relation("anime_reviews", fields: [animeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("anime-reviews")
+}
+
+model Season {
+  id          String   @id @default(uuid())
+  title       String?
+  description String?
+  releaseDate DateTime @map("release_date")
+
+  animeId  String    @map("anime_id")
+  anime    Anime     @relation("anime_seasons", fields: [animeId], references: [id], onDelete: Cascade)
+  episodes Episode[] @relation("season_episodes")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([releaseDate])
+  @@map("seasons")
+}
+
+model Episode {
+  id String @id @default(uuid())
+
+  title       String?
+  description String?
+  url         String
+
+  seasonId String @map("season_id")
+  season   Season @relation("season_episodes", fields: [seasonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("episodes")
+}
+
+model Genre {
+  id   String @id @default(uuid())
+  name String @unique
+
+  anime Anime[] @relation("anime_genres")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("genres")
+}
+
+model Poster {
+  id  String @id @default(uuid())
+  url String
+
+  animeId String @unique @map("anime_id")
+  anime   Anime  @relation("anime_posters", fields: [animeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("posters")
+}
