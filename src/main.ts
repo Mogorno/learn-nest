@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
+import { setupSwagger } from './shared/utils';
 // import { AllExceptionsFilter } from './shared/filters';
 // import { ResponseInterceptor } from './shared/interceptors';
 // import { AuthGuard } from './shared/guards';
@@ -10,17 +11,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(cookieParser());
+
   app.useGlobalPipes(new ValidationPipe());
-  const config = new DocumentBuilder()
-    .setTitle('Learn Nest')
-    .setDescription('API documentation for learn-nest')
-    .setVersion('1.0.0')
-    .setContact('Mogorno', 'https://github.com/Mogorno', 'suport@gmail.com')
-    .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-
-  SwaggerModule.setup('/docs', app, document);
+  setupSwagger(app);
   // app.use(loggerFnMiddleware);
   // app.useGlobalGuards(new AuthGuard());
   // app.useGlobalInterceptors(new ResponseInterceptor());

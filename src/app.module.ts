@@ -12,6 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AnimeModule } from './anime/anime.module';
 import { GenreModule } from './genre/genre.module';
 import { LoggerMiddleware } from './shared/middlewares';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { LoggerMiddleware } from './shared/middlewares';
     ActorModule,
     AnimeModule,
     GenreModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
